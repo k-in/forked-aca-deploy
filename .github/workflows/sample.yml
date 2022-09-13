@@ -30,7 +30,7 @@ jobs:
       with:
         resource-group: aca-test
         name: ctapp-hoge
-        location: 'Japan East'
+        location: 'East US'
         managed-environment-name: 'ctenv-hoge'
         dapr-app-port: 3000
         dapr-app-protocol: 'http'
