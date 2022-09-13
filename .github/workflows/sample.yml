@@ -28,7 +28,7 @@ jobs:
     - name: 'Deploy to Azure Container Apps'
       uses: ./
       with:
-        resource-group: rg-hoge
+        resource-group: aca-test
         name: ctapp-hoge
         location: 'Japan East'
         managed-environment-name: 'ctenv-hoge'
