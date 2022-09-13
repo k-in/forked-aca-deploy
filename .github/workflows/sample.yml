@@ -50,14 +50,12 @@ jobs:
         containers-config-json: | 
           [
             {
-              "name":"simple-hello-world-container-1",
-              "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest",
-              "port": "8080"
+              "name":"busybox",
+              "image": "hub.docker.com/layers/library/busybox:latest"
             },
            {
               "name":"simple-hello-world-container-2",
-              "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest",
-              "port": "8081"
+              "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
             }
           ]
 
