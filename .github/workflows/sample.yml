@@ -53,10 +53,6 @@ jobs:
               "name":"busybox",
               "image": "docker.io/library/busybox:latest",
               "command": ["/bin/bash", "-c", "echo hello; sleep 3600"]
-            },
-           {
-              "name":"simple-hello-world-container-2",
-              "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
             }
           ]
 
