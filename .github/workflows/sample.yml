@@ -51,7 +51,11 @@ jobs:
           [
             {
               "name":"nginx",
-              "image": "nginx"
+              "image": "nginx:latest"
+            },
+           {
+              "name":"simple-hello-world-container",
+              "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
             }
           ]
 
