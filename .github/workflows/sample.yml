@@ -50,8 +50,8 @@ jobs:
         containers-config-json: | 
           [
             {
-              "name":"hello-word",
-              "image": "docker.io/library/hello-word:latest"
+              "name":"hello-world",
+              "image": "docker.io/library/hello-world:latest"
             },
            {
               "name":"simple-hello-world-container-2",
