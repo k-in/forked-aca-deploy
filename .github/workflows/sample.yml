@@ -51,7 +51,8 @@ jobs:
           [
             {
               "name":"busybox",
-              "image": "hub.docker.com/layers/library/busybox:latest"
+              "image": "docker.io/library/busybox:latest",
+              "command": "sleep 3600"
             },
            {
               "name":"simple-hello-world-container-2",
