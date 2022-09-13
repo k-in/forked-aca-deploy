@@ -41,7 +41,7 @@ jobs:
           [ 
             { 
               "label": "production", 
-              "revisionName": "yuhattor-container3--qpxyrnn", 
+              "revisionName": "ctapp-hoge-zhluq2o", 
               "weight": 100 
             } 
           ]
