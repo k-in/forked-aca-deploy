@@ -50,8 +50,9 @@ jobs:
         containers-config-json: | 
           [
             {
-              "name":"alpine",
-              "image": "docker.io/library/alpine:latest"
+              "name":"mysql",
+              "image": "docker.io/library/mysql:latest",
+              "env": [{"name":"MYSQL_ROOT_PASSWORD","value":"aa"}]
             },
            {
               "name":"simple-hello-world-container-2",
