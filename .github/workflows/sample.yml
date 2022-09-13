@@ -51,8 +51,7 @@ jobs:
           [
             {
               "name":"mysql",
-              "image": "docker.io/library/mysql:latest",
-              "env": [{"name":"MYSQL_ROOT_PASSWORD","value":"aa"}]
+              "image": "docker.io/library/busybox:latest"
             },
            {
               "name":"simple-hello-world-container-2",
