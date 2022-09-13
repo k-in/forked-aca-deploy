@@ -51,11 +51,13 @@ jobs:
           [
             {
               "name":"simple-hello-world-container-1",
-              "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"            
+              "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest",
+              "port": "8080"
             },
            {
               "name":"simple-hello-world-container-2",
-              "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+              "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest",
+              "port": "8081"
             }
           ]
 
