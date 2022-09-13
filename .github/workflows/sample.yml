@@ -50,8 +50,8 @@ jobs:
         containers-config-json: | 
           [
             {
-              "name":"hello-world",
-              "image": "docker.io/library/hello-world:latest"
+              "name":"alpine",
+              "image": "docker.io/library/alpine:latest"
             },
            {
               "name":"simple-hello-world-container-2",
