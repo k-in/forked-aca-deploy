@@ -50,11 +50,11 @@ jobs:
         containers-config-json: | 
           [
             {
-              "name":"nginx",
-              "image": "nginx:latest"
+              "name":"simple-hello-world-container-1",
+              "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"            
             },
            {
-              "name":"simple-hello-world-container",
+              "name":"simple-hello-world-container-2",
               "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
             }
           ]
