@@ -1,12 +1,11 @@
 on: [push, pull_request]
   
-name: Container Deployment Sample Workflow
+name: Samlpe GitHub Action to create new revision of Container App
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    # checkout the repo
     - name: 'Checkout GitHub Action'
       uses: actions/checkout@master
 
@@ -15,11 +14,14 @@ jobs:
         node-version: '16.13.0'
         registry-url: 'https://npm.pkg.github.com'
 
+    - run: npm install
+    - run: tsc
+
     # local debugging only.
     # Remove or comment out this step when running on GitHub.
-    - run: |
-        which az || curl -sL https://aka.ms/InstallAzureCLIDeb | bash
-        npm install && npm run build
+    # - run: |
+    #     which az || curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+    #     npm install && npm run build
 
     - name: 'Login via Azure CLI'
       uses: azure/login@v1
@@ -29,33 +31,6 @@ jobs:
       uses: ./
       with:
         resource-group: aca-test
-        name: ctapp-hoge
-        location: 'East US'
-        managed-environment-name: 'ctenv-hoge'
-        dapr-app-port: 3000
-        dapr-app-protocol: 'http'
-        dapr-enabled: true
-        ingress-external: true
-        ingress-target-port: 3000
-        ingress-traffic-json: |
-          [ 
-            { 
-              "label": "production", 
-              "revisionName": "ctapp-hoge-zhluq2o", 
-              "weight": 100 
-            } 
-          ]
-        scale-max-replicas: 5
-        scale-min-replicas: 1
-        containers-config-json: | 
-          [
-            {
-              "name":"mysql",
-              "image": "docker.io/library/busybox:latest"
-            },
-           {
-              "name":"simple-hello-world-container-2",
-              "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
-            }
-          ]
-
+        name: ctapp-sample
+        image: mcr.microsoft.com/azuredocs/containerapps-helloworld:latest
+        revision-name-suffix: ${{ github.sha }}

@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as crypto from "crypto";
-import { ContainerAppsAPIClient, ContainerApp } from "@azure/arm-appcontainers";
+import { ContainerAppsAPIClient, ContainerApp, TrafficWeight, Revision } from "@azure/arm-appcontainers";
 import { TokenCredential, DefaultAzureCredential } from "@azure/identity";
 import { AuthorizerFactory } from "azure-actions-webclient/AuthorizerFactory";
 import { IAuthorizer } from "azure-actions-webclient/Authorizer/IAuthorizer";
@@ -11,9 +11,6 @@ var prefix = !!process.env.AZURE_HTTP_USER_AGENT ? `${process.env.AZURE_HTTP_USE
 
 async function main() {
 
-// Please refer to this sample code
-// https://github.com/Azure/azure-sdk-for-js/blob/32c07776aa91c302fb2c90ba65e3bb4668b5a792/sdk/appcontainers/arm-appcontainers/samples-dev/containerAppsCreateOrUpdateSample.ts
-
   try {
     // Set user agent variable.
     let usrAgentRepo = crypto.createHash('sha256').update(`${process.env.GITHUB_REPOSITORY}`).digest('hex');
@@ -23,97 +20,126 @@ async function main() {
 
     let endpoint: IAuthorizer = await AuthorizerFactory.getAuthorizer();
     var taskParams = TaskParameters.getTaskParams(endpoint);
-    let credential: TokenCredential = new DefaultAzureCredential()
-    let subscriptionId = taskParams.subscriptionId
+    let credential: TokenCredential = new DefaultAzureCredential();
+    // The revision name format is described in this documentation
+    // https://learn.microsoft.com/en-us/azure/container-apps/revisions#revision-name-suffix
+    const revisionName = `${taskParams.containerAppName}--${taskParams.revisionNameSuffix}`;
+    if (revisionName.length > 64) throw new Error(`The total length of revision name ${revisionName} is ${revisionName.length}. This must be less than 64.`);
 
     console.log("Predeployment Steps Started");
     const client = new ContainerAppsAPIClient(credential, taskParams.subscriptionId);
 
-    // TBD: Remove key when there is key without value
-    const daprConfig: {
-      appPort?: number,
-      appProtocol?: string,
-      enabled: boolean
-    } = {
-      appPort: taskParams.daprAppPort, 
-      appProtocol: taskParams.daprAppProtocol, 
-      enabled: taskParams.daprEnabled
-    };
-    if (isNaN(taskParams.daprAppPort)) {
-      delete daprConfig.appPort
-    };
-    if (taskParams.daprAppProtocol == "") {
-      delete daprConfig.appProtocol
-    };
+    const currentAppProperty = await client.containerApps.get(taskParams.resourceGroup, taskParams.containerAppName);
 
-    // TBD: Remove key when there is key without value
+    if (taskParams.deactivateRevisionMode) {
+      await deactivateRevision({
+        client,
+        resourceGroup: taskParams.resourceGroup,
+        containerAppName: taskParams.containerAppName,
+        traffic: currentAppProperty.configuration?.ingress?.traffic || [],
+        revisionName: `${taskParams.containerAppName}--${taskParams.revisionNameSuffix}`,
+      });
+      return;
+    }
+
+    const traffics = currentAppProperty.configuration!.ingress!.traffic!.filter((traffic: TrafficWeight) => {
+      if (!traffic.weight || traffic.weight === 0) return false
+      if (traffic.latestRevision) {
+        traffic.latestRevision = false;
+        traffic.revisionName = currentAppProperty.latestRevisionName;
+      }
+      return true;
+    }) || [];
+    traffics.push({
+      revisionName: `${taskParams.containerAppName}--${taskParams.revisionNameSuffix}`,
+      weight: 0,
+      latestRevision: false
+    })
+
     const ingresConfig: {
       external: boolean,
       targetPort?: number,
       traffic?: any[],
+      customDomains?: any[]
     } = {
-      external: taskParams.ingressExternal, 
-      targetPort: taskParams.ingressTargetPort, 
-      // traffic: taskParams.ingressTraffic, 
-    };
-    if (taskParams.ingressTraffic.length == 0) {
-      delete ingresConfig.traffic
-    };
+      external: currentAppProperty.configuration!.ingress!.external!,
+      targetPort: currentAppProperty.configuration!.ingress!.targetPort!,
+      traffic: traffics,
+      customDomains: currentAppProperty.configuration!.ingress!.customDomains! || []
+    }
 
-    // TBD: Remove key when there is key without value
     const scaleConfig: {
       maxReplicas: number,
       minReplicas: number,
+      rules: any[]
     } = {
-      maxReplicas: taskParams.scaleMaxReplicas, 
-      minReplicas: taskParams.scaleMinReplicas, 
-    };
+      maxReplicas: currentAppProperty.template!.scale!.maxReplicas!,
+      minReplicas: currentAppProperty.template!.scale!.minReplicas!,
+      rules: [{
+        "name": 'httpscalingrule',
+        "custom": {
+          "type": 'http',
+          "metadata": {
+            "concurrentRequests": '50'
+          }
+        }
+      }]
+    }
 
     let networkConfig: {
       dapr: object,
-      ingress?: object
+      ingress?: object,
+      activeRevisionsMode?: string
     } = {
-      dapr: daprConfig,
-      ingress: ingresConfig
-    };
-    if (taskParams.ingressExternal == false) {
+      dapr: currentAppProperty.configuration!.dapr!,
+      ingress: ingresConfig,
+      activeRevisionsMode: "Multiple"
+    }
+    if (ingresConfig.external == false || ingresConfig.external == undefined) {
       delete networkConfig.ingress
-    };
+    }
 
-    // TBD: Find a way to get a value instead of json
-    const containersConfig = taskParams.containersConfig
+    const containerConfig = [
+      {
+        "name": taskParams.containerAppName,
+        "image": taskParams.imageName
+      }
+    ]
 
     const containerAppEnvelope: ContainerApp = {
       configuration: networkConfig,
-      location: taskParams.location,
-      managedEnvironmentId:
-        `/subscriptions/${subscriptionId}/resourceGroups/${taskParams.resourceGroup}/providers/Microsoft.App/managedEnvironments/${taskParams.managedEnvironmentName}`,
+      location: currentAppProperty.location,
+      managedEnvironmentId: currentAppProperty.managedEnvironmentId,
       template: {
-        containers: containersConfig,
-        scale: scaleConfig
+        containers: containerConfig,
+        scale: scaleConfig,
+        revisionSuffix: taskParams.revisionNameSuffix
       }
     };
 
     console.log("Deployment Step Started");
 
-    let containerAppDeploymentResult = await client.containerApps.beginCreateOrUpdateAndWait(
+    // update
+    await client.containerApps.beginUpdateAndWait(
       taskParams.resourceGroup,
       taskParams.containerAppName,
       containerAppEnvelope,
     );
 
-    if (containerAppDeploymentResult.provisioningState == "Succeeded") {
-      console.log("Deployment Succeeded");
+    // check if added revision is included in revision list
+    const addedRevision = await client.containerAppsRevisions.getRevision(
+      taskParams.resourceGroup,
+      taskParams.containerAppName,
+      `${taskParams.containerAppName}--${taskParams.revisionNameSuffix}`
+    )
+    if (!addedRevision) throw new Error(`Failed to add revision ${taskParams.containerAppName}--${taskParams.revisionNameSuffix}.`);
 
-      if (ingresConfig.external == true) {
-        let appUrl = "http://"+containerAppDeploymentResult.latestRevisionFqdn+"/"
-        core.setOutput("app-url", appUrl);
-        console.log("Your App has been deployed at: "+appUrl);
-      }
-    } else {
-      core.debug("Deployment Result: "+containerAppDeploymentResult);
-      throw Error("Container Deployment Failed"+containerAppDeploymentResult);
+    if (ingresConfig.external == true && addedRevision.fqdn) {
+      let appUrl = "https://" + addedRevision.fqdn + "/"
+      core.setOutput("app-url", appUrl);
+      console.log("Your App has been deployed at: " + appUrl);
     }
+    console.log("Deployment Succeeded");
   }
   catch (error: string | any) {
     console.log("Deployment Failed with Error: " + error);
@@ -123,6 +149,19 @@ async function main() {
     // Reset AZURE_HTTP_USER_AGENT.
     core.exportVariable('AZURE_HTTP_USER_AGENT', prefix);
   }
+}
+
+async function deactivateRevision(params: any) {
+  const { client, resourceGroup, containerAppName, traffic, revisionName } = params;
+  const targetRevisions = traffic.filter((r: any) => r.revisionName === revisionName);
+
+  // Check traffic weight of the target revision
+  if (targetRevisions.length > 0 && targetRevisions.reduce((prev: number, curr: any) => prev + curr.weight, 0) !== 0)
+    throw new Error(`Traffic weight of revision ${revisionName} under container app ${containerAppName} is not 0. Set 0 to the traffic weight of the revision before deactivation.`);
+
+  console.log("Deactivation Step Started");
+  await client.containerAppsRevisions.deactivateRevision(resourceGroup, containerAppName, revisionName);
+  console.log("Deactivation Step Succeeded");
 }
 
 main();
