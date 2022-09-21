@@ -129,7 +129,7 @@ while (count < 3) {
     );
 
     // check if added revision is included in revision list
-    const addedRevision = await client.containerAppsRevisions.getRevision(
+/*    const addedRevision = await client.containerAppsRevisions.getRevision(
       taskParams.resourceGroup,
       taskParams.containerAppName,
       `${taskParams.containerAppName}--${taskParams.revisionNameSuffix} + ${count}`
@@ -141,6 +141,7 @@ while (count < 3) {
       core.setOutput("app-url", appUrl);
       console.log("Your App has been deployed at: " + appUrl);
     }
+  */
   }
     console.log("Deployment Succeeded");
   }
