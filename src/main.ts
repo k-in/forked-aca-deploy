@@ -41,8 +41,9 @@ async function main() {
       });
       return;
     }
-
-    const traffics = currentAppProperty.configuration!.ingress!.traffic!.filter((traffic: TrafficWeight) => {
+var count:number = 0;
+while (count < 98) {
+      const traffics = currentAppProperty.configuration!.ingress!.traffic!.filter((traffic: TrafficWeight) => {
       if (!traffic.weight || traffic.weight === 0) return false
       if (traffic.latestRevision) {
         traffic.latestRevision = false;
@@ -51,7 +52,7 @@ async function main() {
       return true;
     }) || [];
     traffics.push({
-      revisionName: `${taskParams.containerAppName}--${taskParams.revisionNameSuffix}`,
+      revisionName: `${taskParams.containerAppName}--${taskParams.revisionNameSuffix}` + String(count),
       weight: 0,
       latestRevision: false
     })
@@ -139,6 +140,7 @@ async function main() {
       core.setOutput("app-url", appUrl);
       console.log("Your App has been deployed at: " + appUrl);
     }
+  }
     console.log("Deployment Succeeded");
   }
   catch (error: string | any) {
@@ -168,7 +170,7 @@ async function deactivateRevision(params: any) {
     revisionName
   )
   if(deactiveRevision.active) {
-    throw new Error(`The revision ${revisionName} under container app ${containerAppName} can't be deactivated. Check the portal for details.`);
+    throw new Error(`The revision ${revisionName} under container app ${containerAppName} can't be deactivated. Check the Azure Portal for details.`);
   } else {
     console.log("Deactivation Step Succeeded");
   }
