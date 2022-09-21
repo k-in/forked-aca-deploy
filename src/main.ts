@@ -41,8 +41,8 @@ async function main() {
       });
       return;
     }
-var count:number = 3;
-while (count < 10) {
+var count:number = 10;
+while (count < 30) {
       count++;
       const traffics = currentAppProperty.configuration!.ingress!.traffic!.filter((traffic: TrafficWeight) => {
       if (!traffic.weight || traffic.weight === 0) return false
