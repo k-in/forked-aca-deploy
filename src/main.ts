@@ -115,7 +115,7 @@ while (count < 3) {
       template: {
         containers: containerConfig,
         scale: scaleConfig,
-        revisionSuffix: taskParams.revisionNameSuffix
+        revisionSuffix: taskParams.revisionNameSuffix + count
       }
     };
 
@@ -132,7 +132,7 @@ while (count < 3) {
     const addedRevision = await client.containerAppsRevisions.getRevision(
       taskParams.resourceGroup,
       taskParams.containerAppName,
-      `${taskParams.containerAppName}--${taskParams.revisionNameSuffix}`
+      `${taskParams.containerAppName}--${taskParams.revisionNameSuffix} + ${count}`
     )
     if (!addedRevision) throw new Error(`Failed to add revision ${taskParams.containerAppName}--${taskParams.revisionNameSuffix}.`);
 
