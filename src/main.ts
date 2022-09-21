@@ -167,7 +167,7 @@ async function deactivateRevision(params: any) {
         containerAppName,
         revisionName
       )
-  console.log(addedRevision);
+  console.log(addedRevision.active);
   console.log("Deactivation Step Succeeded");
 }
 
