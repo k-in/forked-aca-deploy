@@ -160,8 +160,8 @@ async function deactivateRevision(params: any) {
     throw new Error(`Traffic weight of revision ${revisionName} under container app ${containerAppName} is not 0. Set 0 to the traffic weight of the revision before deactivation.`);
 
   console.log("Deactivation Step Started");
-  await client.containerAppsRevisions.deactivateRevision(resourceGroup, containerAppName, revisionName);
-  // check if added revision is included in revision list
+  //await client.containerAppsRevisions.deactivateRevision(resourceGroup, containerAppName, revisionName);
+  // check if revision's status is deactived
   const deactiveRevision = await client.containerAppsRevisions.getRevision(
     resourceGroup,
     containerAppName,
