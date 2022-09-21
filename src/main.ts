@@ -168,7 +168,7 @@ async function deactivateRevision(params: any) {
     revisionName
   )
   if(deactiveRevision.active) {
-    throw new Error(`The revision ${revisionName} under container app ${containerAppName} is not deactivated. Check the portal for details.`);
+    throw new Error(`The revision ${revisionName} under container app ${containerAppName} can't be deactivated. Check the portal for details.`);
   } else {
     console.log("Deactivation Step Succeeded");
   }
