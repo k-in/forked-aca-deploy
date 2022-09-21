@@ -42,7 +42,7 @@ async function main() {
       return;
     }
 var count:number = 0;
-while (count < 98) {
+while (count < 2) {
       const traffics = currentAppProperty.configuration!.ingress!.traffic!.filter((traffic: TrafficWeight) => {
       if (!traffic.weight || traffic.weight === 0) return false
       if (traffic.latestRevision) {
@@ -52,7 +52,7 @@ while (count < 98) {
       return true;
     }) || [];
     traffics.push({
-      revisionName: `${taskParams.containerAppName}--${taskParams.revisionNameSuffix}` + String(count),
+      revisionName: `${taskParams.containerAppName}--${taskParams.revisionNameSuffix} + ${count}`,
       weight: 0,
       latestRevision: false
     })
