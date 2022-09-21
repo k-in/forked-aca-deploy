@@ -42,7 +42,8 @@ async function main() {
       return;
     }
 var count:number = 0;
-while (count < 2) {
+while (count < 3) {
+      count++;
       const traffics = currentAppProperty.configuration!.ingress!.traffic!.filter((traffic: TrafficWeight) => {
       if (!traffic.weight || traffic.weight === 0) return false
       if (traffic.latestRevision) {
