@@ -41,7 +41,7 @@ async function main() {
       });
       return;
     }
-var count:number = 30;
+var count:number = 67;
 while (count < 95) {
       count++;
       const traffics = currentAppProperty.configuration!.ingress!.traffic!.filter((traffic: TrafficWeight) => {
