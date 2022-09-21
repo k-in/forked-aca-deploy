@@ -162,13 +162,16 @@ async function deactivateRevision(params: any) {
   console.log("Deactivation Step Started");
   await client.containerAppsRevisions.deactivateRevision(resourceGroup, containerAppName, revisionName);
       // check if added revision is included in revision list
-      const addedRevision = await client.containerAppsRevisions.getRevision(
+      const deactiveRevision = await client.containerAppsRevisions.getRevision(
         resourceGroup,
         containerAppName,
         revisionName
       )
-  console.log(addedRevision.active);
-  console.log("Deactivation Step Succeeded");
+  if(deactiveRevision.active) {
+    console.log("Deactivation Step Error");
+  } else {
+    console.log("Deactivation Step Succeeded");
+  }
 }
 
 main();
