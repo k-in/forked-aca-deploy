@@ -41,9 +41,6 @@ async function main() {
       });
       return;
     }
-var count:number = 67;
-while (count < 95) {
-      count++;
       const traffics = currentAppProperty.configuration!.ingress!.traffic!.filter((traffic: TrafficWeight) => {
       if (!traffic.weight || traffic.weight === 0) return false
       if (traffic.latestRevision) {
@@ -53,7 +50,7 @@ while (count < 95) {
       return true;
     }) || [];
     traffics.push({
-      revisionName: `${taskParams.containerAppName}--${taskParams.revisionNameSuffix} + ${count}`,
+      revisionName: `${taskParams.containerAppName}--${taskParams.revisionNameSuffix}`,
       weight: 0,
       latestRevision: false
     })
@@ -115,7 +112,7 @@ while (count < 95) {
       template: {
         containers: containerConfig,
         scale: scaleConfig,
-        revisionSuffix: taskParams.revisionNameSuffix + count
+        revisionSuffix: taskParams.revisionNameSuffix
       }
     };
 
@@ -129,10 +126,10 @@ while (count < 95) {
     );
 
     // check if added revision is included in revision list
-/*    const addedRevision = await client.containerAppsRevisions.getRevision(
+    const addedRevision = await client.containerAppsRevisions.getRevision(
       taskParams.resourceGroup,
       taskParams.containerAppName,
-      `${taskParams.containerAppName}--${taskParams.revisionNameSuffix} + ${count}`
+      `${taskParams.containerAppName}--${taskParams.revisionNameSuffix}`
     )
     if (!addedRevision) throw new Error(`Failed to add revision ${taskParams.containerAppName}--${taskParams.revisionNameSuffix}.`);
 
@@ -141,8 +138,7 @@ while (count < 95) {
       core.setOutput("app-url", appUrl);
       console.log("Your App has been deployed at: " + appUrl);
     }
-  */
-  }
+    
     console.log("Deployment Succeeded");
   }
   catch (error: string | any) {
