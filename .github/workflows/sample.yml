@@ -31,7 +31,7 @@ jobs:
       uses: ./
       with:
         resource-group: aca-test
-        name: ctapp-hoge-new
+        name: ctapp-hoge
         image: mcr.microsoft.com/azuredocs/containerapps-helloworld:latest
         deactivate-revision-mode: false
         revision-name-suffix: "test100"
