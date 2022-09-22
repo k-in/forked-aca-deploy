@@ -34,4 +34,4 @@ jobs:
         name: ctapp-hoge
         image: mcr.microsoft.com/azuredocs/containerapps-helloworld:latest
         deactivate-revision-mode: false
-        revision-name-suffix: "test"
+        revision-name-suffix: "test96"
